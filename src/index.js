@@ -2,22 +2,41 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
 
-class Square extends React.Component {
-  render() {
-    return (
-      <button className="square" onClick={() => this.props.onClick()}>
-        {this.props.value}
-      </button>
-    );
-  }
+// The square component is a controlled function component.
+// Controlled components are components that do not have their own state and are controlled by their parent component.
+// Function components are a simpler way to write components that only contain a render method.
+// In this case we have a component called square, which renders a button that takes two props;
+// The first being the onClick function passed through from the Board (parent) component
+// The second is a value passed through to define the squares contents
+
+function Square(props) {
+  return ( 
+    <button className="square" onClick={props.onClick}>
+      {props.value}
+    </button>
+  )
 }
+
+// The board is a parent class with it's own state, methods, and render.
+// The state.square
+//
 
 class Board extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      squares: Array(9).fill(null)
+      squares: Array(9).fill(null),
+      xIsNext: true,
     };
+  }
+
+  handleClick(i){
+    const squares = this.state.squares.slice();
+    if(calculateWinner(squares) || squares[i]){
+      return;
+    }
+    squares[i] = this.state.xIsNext ? 'X': '0';
+    this.setState({squares: squares, xIsNext: !this.state.xIsNext})
   }
   renderSquare(i) {
     return (
@@ -29,7 +48,13 @@ class Board extends React.Component {
   }
 
   render() {
-    const status = "Next player: X";
+    const winner = calculateWinner(this.state.squares);
+    let status;
+    if (winner) {
+      status = 'Winner: ' + winner; 
+    } else {
+      status = 'Next player: ' + (this.state.xIsNext ? 'X' : '0');
+    }
 
     return (
       <div>
@@ -68,6 +93,25 @@ class Game extends React.Component {
       </div>
     );
   }
+}
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
 }
 
 // ========================================
